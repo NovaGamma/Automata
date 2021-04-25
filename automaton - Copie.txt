@@ -1,0 +1,9 @@
+2 #number of letters in the alphabet
+3 #number of states in the automaton
+1:0 #number_of_entries then a list of entries refered by the number of the state
+2:1:0 #same than the entries but for the output
+4 #number of transitions
+0:a:1 #state of depart:letter:state of arrival
+0:b:2
+0:a:0
+1:a:2
