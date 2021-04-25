@@ -344,7 +344,6 @@ class Automaton():
                     else:
                         combine.append(t[0])
                 transition[1] = combine
-            print(new_state.transitions)
             states.append(new_state)
             self.standard = states
             return True
@@ -382,44 +381,62 @@ class Automaton():
     def synchronize(self):
         states = deepcopy(self.states)
 
-        position = []
-        path = []
+        while True:
+            position = []
+            path = []
 
-        for state in states:
-            if state.isAsync():
-                position.append(state)
-                break
-        initial = position[0]
-        while position != []:
-            pos = position[0]
-            epsilon = pos.getEpsilon()
-            for direction in epsilon:
-                if not direction in path:
-                    if direction.isAsync() and len(direction.transitions) == 1 and not direction.isOutput:
-                        position.append(direction)
-                    else:
-                        path.append(direction)
-            position.remove(pos)
+            for state in states:
+                if state.isAsync():
+                    position.append(state)
+                    break
+            if position == []:
+                states = removeUselessStates(states)
+                return states
+            initial = position[0]
+            empty = []
+            while position != []:
+                pos = position[0]
+                epsilon = pos.getEpsilon()
+                for direction in epsilon:
+                    if not direction in path:
+                        if direction.isAsync() and len(direction.transitions) == 1 and not direction.isOutput:
+                            position.append(direction)
+                            empty.append(direction)
+                        else:
+                            path.append(direction)
+                position.remove(pos)
 
-        print(path)
-        new_transition = []
-        for state in path:
-            if not state.transitions == []:
-                for transition in state.transitions:
-                    new_transition.append(transition)
-            elif state.isOutput:
-                initial.isOutput = True
-        print(new_transition)
+            new_transition = []
+            for state in path:
+                if not state.transitions == []:
+                    for transition in state.transitions:
+                        new_transition.append(transition)
+                elif state.isOutput:
+                    initial.isOutput = True
 
-        letters = deepcopy(self.alphabet)
-        letters.append('*')
+            letters = deepcopy(self.alphabet)
+            letters.append('*')
 
-        if initial.isAsync and len(initial.transitions) > 1:
-            initial.transitions.remove(initial.getEpsilon)
-            new_transition.append(initial.transitions)
-        initial.transitions = async_combine(new_transition,letters)
+            if initial.isAsync and len(initial.transitions) > 1:
+                initial.transitions.remove(initial.getEpsilon)
+                new_transition.append(initial.transitions)
+            initial.transitions = async_combine(new_transition,letters)
 
-        print(initial.transitions)
+
+            to_remove = []
+            for state in empty:
+                #we are going to find the states that point toward those to see if it has only one access
+                found = 0
+                for s in states:
+                    if not s in empty:
+                        for transition in s.transitions:
+                            if state in transition[1]:
+                                found += 1
+                if found == 0:
+                    to_remove.append(state)
+
+            for state in to_remove:
+                states.remove(state)
 
 def isAsync(states):
     for state in states:
@@ -442,6 +459,24 @@ def async_combine(transitions,letters):
             newT.insert(0,letter)
             new.append(newT)
     return new
+
+def removeUselessStates(states):
+    to_remove = []
+    for state in states:
+        #we are going to find the states that point toward those to see if it has an access
+        if not state.isEntry:
+            found = 0
+            for s in states:
+                for transition in s.transitions:
+                    if state in transition[1]:
+                        found += 1
+            if found == 0:
+                to_remove.append(state)
+
+    for state in to_remove:
+        states.remove(state)
+
+    return states
 
 def load(path):
     global size_alphabet
@@ -501,7 +536,8 @@ path = 'automaton/' + files[choice-1]
 #path = "automaton.txt"
 auto = load(path)
 print(auto)
-auto.synchronize()
+auto.sync = auto.synchronize()
+print(auto.table(auto.sync))
 
 '''
 print("Finite Automaton table : ")
