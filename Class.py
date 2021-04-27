@@ -418,7 +418,7 @@ class Automaton():
             letters.append('*')
 
             if initial.isAsync and len(initial.transitions) > 1:
-                initial.transitions.remove(initial.getEpsilon)
+                initial.transitions.remove(initial.getEpsilon())
                 new_transition.append(initial.transitions)
             initial.transitions = async_combine(new_transition,letters)
 
@@ -513,8 +513,6 @@ def load(path):
     return Automaton(states,isNotDet,isAsync)
 
 
-
-
 path = "automaton/"
 files = []
 for i in range(46):
@@ -536,12 +534,12 @@ path = 'automaton/' + files[choice-1]
 #path = "automaton.txt"
 auto = load(path)
 print(auto)
+print(auto.table())
 auto.sync = auto.synchronize()
 print(auto.table(auto.sync))
 
 '''
 print("Finite Automaton table : ")
-print(auto.table())
 
 if auto.standardize():
     print("Standard Finite Automaton table :")
