@@ -27,16 +27,21 @@ class Node():
         return "label : {}\n{}Transitions : {}\n\n".format(self.name,"Initial and Final\n" if self.isEntry and self.isOutput else "Initial\n" if self.isEntry else "Final\n" if self.isOutput else "",self.transitions if len(self.transitions) > 0 else "None")
 
     def __lt__(self, other):#rewriting the comparator methods for Nodes to be able to sort a list of Nodes, using the .sort() method
-        return [int(number) for number in str(self).split('.')] < [int(number) for number in str(other).split('.')]#telling it to just compare the names (in the form of a list to be able to compare fused states)
+        return self._name() < other._name()#telling it to just compare the names (in the form of a list to be able to compare fused states)
         #doing it for all comparator < <= == >= >
     def __le__(self,other):
-        return [int(number) for number in str(self).split('.')] <= [int(number) for number in str(other).split('.')]
+        return self._name() <= other._name()
     def __eq__(self,other):
-        return [int(number) for number in str(self).split('.')] == [int(number) for number in str(other).split('.')]
+        return self._name() == other._name()
     def __ge__(self,other):
-        return [int(number) for number in str(self).split('.')] >= [int(number) for number in str(other).split('.')]
+        return self._name() >= other._name()
     def __gt__(self,other):
-        return [int(number) for number in str(self).split('.')] > [int(number) for number in str(other).split('.')]
+        return self._name() > other._name()
+
+    def _name(self):
+        if self.name == 'P':
+            return ['P']
+        return [number for number in str(self).split('.')]
 
     def __add__(self,other):#another magic method used when you write a + b here used to combine to states in the automaton
         if self.name == '':#if the name is empty it mean that it's a placeholder, meaning that we do not have anything to combine
@@ -350,33 +355,64 @@ class Automaton():
         else:
             return False
 
-    def minimize(self):
-        previous = self.complete
-
+    def minimize(self,data):
+        states = deepcopy(data)
+        #first part it to get the sub groups using the Terminal states
         Omega = []
-        T = [state for state in previous if state.isOutput]
-        NT = [state for state in previous if not state.isOutput]
+        T = [state for state in states if state.isOutput]
+        NT = [state for state in states if not state.isOutput]
         Omega = [T,NT]
         groups = {}
-        for group in Omega:
-            result = []
-            for state in group:
-                link = ''
-                for transition in state.transitions:
-                    for group1 in Omega:
-                        if transition[1][0] in group1:
-                            link += '|'.join([state.name for state in group1])
-                print(link)
-                if not link in groups.keys():
-                    groups[link] = [state]
+        for state in states:
+            type = ''
+            for transition in state.transitions:
+                if transition[1][0] in T:
+                    type += 'T'
                 else:
-                    groups[link].append(state)
-        print(groups)
+                    type += 'NT'
+            if not type in groups.keys():
+                groups[type] = [state]
+            else:
+                groups[type].append(state)
+        groups = dict_names(groups)
+        #Now we will iterate the function until we have the same set at the beginning and at the end
+        previous = {}
+        while previous != groups:
+            previous = groups
+            groups = {}
+            for key,group in previous.items():
+                if len(group) > 1:
+                    for state in group:
+                        type = ''
+                        for transition in state.transitions:
+                            for key,sub_group in previous.items():
+                                if transition[1][0] in sub_group:
+                                    type += key
+                        if not type in groups.keys():
+                            groups[type] = [state]
+                        else:
+                            groups[type].append(state)
+                else:
+                    groups[key] = group
+            groups = dict_names(groups)
 
-        print(Omega)
-        print(previous)
-        while Omega != previous:
-            previous = Omega
+        #now we will rebuild the table based on the obtained dictionnary
+        minimized = []
+        for _,group in groups.items():
+            if len(group) > 1:
+                #fusing the states if it should be a fused state
+                new_state = Node("")
+                entry = False
+                for state in group:
+                    if state.isEntry:
+                        entry = True
+                    new_state = new_state + state
+                if entry:
+                    new_state.isEntry = True
+                minimized.append(new_state)
+            else:
+                minimized.append(group[0])
+        return minimized
 
     def synchronize(self):
         states = deepcopy(self.states)
@@ -437,6 +473,14 @@ class Automaton():
 
             for state in to_remove:
                 states.remove(state)
+
+def dict_names(groups):
+    new = {}
+    for _,group in groups.items():
+        temp = [str(state) for state in group]
+        new_name = '|'.join(temp)
+        new[new_name] = group
+    return new
 
 def isAsync(states):
     for state in states:
@@ -511,58 +555,3 @@ def load(path):
             states[int(t[0])].transitions.append([t[1],states[int(t[2])]])
 
     return Automaton(states,isNotDet,isAsync)
-
-
-path = "automaton/"
-files = []
-for i in range(46):
-    file_name = f"Int1-8-{i}.txt"
-    if os.path.exists(path+file_name):
-        files.append(file_name)
-
-print("{} automatons were found".format(len(files)))
-print("You can choose an automaton from the list : ")
-for i,file in enumerate(files):
-    print(f"{i+1} : {file}")
-
-choice = int(input())
-while not 0 <= choice < len(files):
-    print("You cannot choose this")
-    choice = int(input())
-path = 'automaton/' + files[choice-1]
-
-#path = "automaton.txt"
-auto = load(path)
-print(auto)
-print(auto.table())
-auto.sync = auto.synchronize()
-print(auto.table(auto.sync))
-
-'''
-print("Finite Automaton table : ")
-
-if auto.standardize():
-    print("Standard Finite Automaton table :")
-    print(auto.table(auto.standard))
-else:
-    print("The automaton is already standard")
-auto.det_table = auto.determinize()
-print("Deterministic Finite Automaton table :")
-print(auto.table(auto.det_table))
-auto.complete()
-print("Complete Deterministic Finite Automaton table :")
-print(auto.table(auto.complete))
-print("Complement of Complete Deterministic Finite Automaton table :")
-auto.complementary('CDFA')
-print(auto.table(auto.complement))
-auto.minimize()
-
-a = True
-exit = 'Quit'
-while a:
-    word = input(f"Please give the word you want to check (type {exit} to exit) : ")
-    if word != exit:
-        print(auto.recognize(word))
-    else:
-        a = False
-'''

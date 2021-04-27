@@ -1,5 +1,5 @@
 import os
-from Class import*
+from Int1_8_Class import*
 
 #choosing the automaton to load
 
@@ -16,34 +16,38 @@ for i,file in enumerate(files):
     print(f"{i+1} : {file}")
 
 choice = int(input())
-while not 0 <= choice < len(files):
+while not 0 < choice < len(files):
     print("You cannot choose this")
     choice = int(input())
-path = 'automaton/' + files[choice]
+path = 'automaton/' + files[choice-1]
 
 #path = "automaton.txt"
 auto = load(path)
 print(auto)
-
-print("Finite Automaton table : ")
 print(auto.table())
-
-if auto.standardize():
-    print("Standard Finite Automaton table :")
-    print(auto.table(auto.standard))
-else:
-    print("The automaton is already standard")
 auto.det_table = auto.determinize()
 print("Deterministic Finite Automaton table :")
 print(auto.table(auto.det_table))
 auto.complete()
 print("Complete Deterministic Finite Automaton table :")
 print(auto.table(auto.complete))
+minimized = auto.minimize(auto.complete)
+print(auto.table(minimized))
+
+'''
+print("Finite Automaton table : ")
+
+if auto.standardize():
+    print("Standard Finite Automaton table :")
+    print(auto.table(auto.standard))
+else:
+    print("The automaton is already standard")
 print("Complement of Complete Deterministic Finite Automaton table :")
 auto.complementary('CDFA')
 print(auto.table(auto.complement))
-auto.minimize()
-'''
+auto.sync = auto.synchronize()
+print(auto.table(auto.sync))
+
 a = True
 exit = 'Quit'
 while a:
