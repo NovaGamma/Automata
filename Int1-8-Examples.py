@@ -28,4 +28,6 @@ print(array)                                #[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
 
 #----------------------------------------
 #Ternary operators
-#Ternary operators are used 
+#Ternary operators are used to do a series of if-else statements in one line
+n = 6
+variable = 1 if n%4==0 else 2 if n%2==0 else 3
