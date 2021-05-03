@@ -1,6 +1,6 @@
 import os
 
-import Table
+import Int1_8_Table as Table
 
 from copy import deepcopy
 

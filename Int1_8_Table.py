@@ -40,6 +40,5 @@ class Table():
             row_line += '|'
             final += row_line +'\n'
 
-
         final += sep
         return final
