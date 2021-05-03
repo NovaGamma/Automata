@@ -1,15 +1,7 @@
 import os
 
-try:
-    from prettytable import PrettyTable
-except ModuleNotFoundError:
-    a = input("A library is missing (PrettyTable/PTable) do you want to install it ? (Y/N)\nif you don't install it the programm will not work properly\nYou can install it on your own by running 'pip install PTable' in your cmd\n")
-    if a == 'Y':
-        os.system('cmd /c "pip install PTable"')#installing the library used to display the table in a pretty way if it's not found by the program
-        _ = os.system('cls')#cleanign the screen after the installation
-        from prettytable import PrettyTable
-    else:
-        raise Exception("The program cannot run properly, missing library(PTable)")
+import Table
+
 from copy import deepcopy
 
 class Node():
@@ -168,7 +160,8 @@ class Automaton():
     def table(self,input = []):
         if input == []:#mean that it's not for the deterministic or complete automaton
             input = self.states
-        table = PrettyTable()
+        table = Table.Table()
+        #table = PrettyTable()
         fields = [letter for letter in self.alphabet]
         asynchronous = False
         if isAsync(input):
@@ -375,6 +368,7 @@ class Automaton():
             else:
                 groups[type].append(state)
         groups = dict_names(groups)
+
         #Now we will iterate the function until we have the same set at the beginning and at the end
         previous = {}
         while previous != groups:

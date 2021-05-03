@@ -4,15 +4,18 @@ import pygame
 
 class Node():
     def __init__(self,name,x = 0,y = 0,isEntry = False,isOutput = False):
-        self.connection = []
+        self.transitions = []
         self.isEntry = isEntry
         self.isOutput = isOutput
         self.position = (x,y)
         self.name_position = (x-12,y-12)
         self.name = name
         self.name_render = font.render(name,25,(0,0,0))
+        self.selected = False
 
     def display(self):
+        if self.selected:
+            pygame.draw.rect(screen,(255,0,0),(self.position[0]-50,self.position[1]-50,100,100),5)
         pygame.draw.circle(screen,(0,0,0),self.position,50,5)
         screen.blit(self.name_render,self.name_position)
 
