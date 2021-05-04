@@ -31,3 +31,17 @@ print(array)                                #[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
 #Ternary operators are used to do a series of if-else statements in one line
 n = 6
 variable = 1 if n%4==0 else 2 if n%2==0 else 3
+
+#----------------------------------------
+#Dictionnaries
+#some methods about dictionnaries
+dic = {}
+dic['a'] = 1
+dic['b'] = 2
+dic.keys() #-> will return the list of arguments here ['a','b']
+for key,value in dic.items():
+    print(key,value) #will print the pair of key and value in the dictionnary
+    """
+        a 1
+        b 2
+    """#for the current dictionnary
