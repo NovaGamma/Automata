@@ -288,8 +288,7 @@ class Automaton():
                 return False
         if pos.isOutput:
             return True
-        else:
-            return False
+        return False
 
     def complementary(self,table):
         if table == 'CDFA':
@@ -351,10 +350,7 @@ class Automaton():
     def minimize(self,data):
         states = deepcopy(data)
         #first part it to get the sub groups using the Terminal states
-        Omega = []
         T = [state for state in states if state.isOutput]
-        NT = [state for state in states if not state.isOutput]
-        Omega = [T,NT]
         groups = {}
         for state in states:
             type = ''
@@ -367,6 +363,7 @@ class Automaton():
                 groups[type] = [state]
             else:
                 groups[type].append(state)
+
         groups = dict_names(groups)
 
         #Now we will iterate the function until we have the same set at the beginning and at the end
