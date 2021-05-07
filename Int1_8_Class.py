@@ -186,7 +186,7 @@ class Automaton():
             table = self.states
         for state in table:
             for transition in state.transitions:
-                if len(transition[1] > 1):
+                if len(transition[1]) > 1:
                     return False
         return True
 
@@ -242,7 +242,7 @@ class Automaton():
 
     def isComplete(self,table = ''):
         if table == '':
-            table = self.det_table
+            table = self.states
         for state in table:
             for letter in self.alphabet:
                 found = False
@@ -269,14 +269,14 @@ class Automaton():
                     state.transitions.append([letter,[sink]])
             state.transitions.sort()
         complete.append(sink)
-        self.complete = complete
+        return complete
 
     def combine(self):
         for state in self.states:
             state.combine()
 
-    def recognize(self,word):
-        entry = [entry for entry in self.complete if entry.isEntry]
+    def recognize(self,word,table):
+        entry = [entry for entry in table if entry.isEntry]
         pos = entry[0]
         for letter in word:
             found = False
@@ -291,18 +291,13 @@ class Automaton():
         return False
 
     def complementary(self,table):
-        if table == 'CDFA':
-            table = self.complete
-        elif table == 'MCDFA':
-            table = self.min_table
-
         complement = deepcopy(table)
         for state in complement:
             if state.isOutput:
                 state.isOutput = False
             else:
                 state.isOutput = True
-        self.complement = complement
+        return complement
 
     def isStandard(self):
         entries = [entry for entry in self.states if entry.isEntry]
@@ -315,37 +310,33 @@ class Automaton():
         return 1
 
     def standardize(self):
-        standard = self.isStandard()
         states = deepcopy(self.states)
-        if not standard:
-            new_state = Node('i')
-            transitions = [state.transitions for state in states if state.isEntry]
-            for state in states:
-                if state.isEntry:
-                    state.isEntry = False
-            t_comb = []
-            for t in transitions:
-                for t2 in t:
-                    t_comb.append(t2)
-            transitions = t_comb
-            new_state.isEntry = True
-            new_state.transitions = transitions
-            new_state.combine()
-            # transform [['a', [[0, 1]]], ['b', [[2]]]] to [['a', [0, 1]], ['b', [2]]]
-            for transition in new_state.transitions:
-                combine = []
-                for t in transition[1]:
-                    if len(t) > 1:
-                        for t2 in t:
-                            combine.append(t2)
-                    else:
-                        combine.append(t[0])
-                transition[1] = combine
-            states.append(new_state)
-            self.standard = states
-            return True
-        else:
-            return False
+        new_state = Node('i')
+        transitions = [state.transitions for state in states if state.isEntry]
+        for state in states:
+            if state.isEntry:
+                state.isEntry = False
+        t_comb = []
+        for t in transitions:
+            for t2 in t:
+                t_comb.append(t2)
+        transitions = t_comb
+        new_state.isEntry = True
+        new_state.transitions = transitions
+        new_state.combine()
+        # transform [['a', [[0, 1]]], ['b', [[2]]]] to [['a', [0, 1]], ['b', [2]]]
+        for transition in new_state.transitions:
+            combine = []
+            for t in transition[1]:
+                if len(t) > 1:
+                    for t2 in t:
+                        combine.append(t2)
+                else:
+                    combine.append(t[0])
+            transition[1] = combine
+        states.append(new_state)
+        self.standard = states
+        return states
 
     def minimize(self,data):
         states = deepcopy(data)
