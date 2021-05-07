@@ -185,7 +185,7 @@ class Automaton():
         if table == '':
             table = self.states
         for state in table:
-            for transition in state:
+            for transition in state.transitions:
                 if len(transition[1] > 1):
                     return False
         return True
