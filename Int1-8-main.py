@@ -19,12 +19,16 @@ choice = int(input())
 while not 0 < choice < len(files):
     print("You cannot choose this")
     choice = int(input())
-path = 'automaton/' + files[choice-1]
 
+for i,file in enumerate(files):
+    path = 'automaton/' + files[i]
 #path = "automaton.txt"
-auto = load(path)
-print(auto)
-print(auto.table())
+    print(i)
+    auto = load(path)
+
+    #print(auto)
+    #print(auto.table())
+input()
 auto.det_table = auto.determinize()
 print("Deterministic Finite Automaton table :")
 print(auto.table(auto.det_table))
