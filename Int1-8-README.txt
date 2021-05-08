@@ -1,8 +1,24 @@
-This is the project of the group Int1-8
+This is the project of the group Int1-8:
+-Elvin AUPIAIS--BERTHY
+-Thomas CASASNOVAS
+-Guillaume GOMEZ
+-Anne HIRIART
+
+The objective of the project was to be able to automate all the tasks we were asked to perform during the courses.
+We therefore had to be able to read a given Finite Automaton (FA), represent it in a table,
+determine and complete it after testing if it already was, minimize it, find out whether or not it recognizes a given world,
+find its complementary language and finally standardize it. In order to do this, we decided to use Python,
+which is one of the most efficient.
+
 
 Elvin was the main contributor to the project, but not all the function were written by him,
-but he rewrote and optimized them, hence the code that seems written by only one person
+but he rewrote and optimized them, hence the code that seems written by only one person.
 
+-Elvin did the synchronization and the magic method __add__ to combine two states into a new one
+-Thomas wrote the algorithm for the minimize function and the complement
+-Guillaume wrote the basis of the classes, did all the translation for the test automata, the standardize function
+and the recognition of a word
+-Anne did all the menu with the check functions that come with it, the load function, the determinization and completion of an automaton
 
 Elvin's Note
 

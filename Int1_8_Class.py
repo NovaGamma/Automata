@@ -150,7 +150,6 @@ class Node():                       #creating Class Node, which correspond to a 
         #if we haven't found any we return False
         return False
 
-
     def getEpsilon(self):
         #function to get the list of epsilon transitions
         for transition in self.transitions:
@@ -162,7 +161,7 @@ class Node():                       #creating Class Node, which correspond to a 
         return []
 
 class Automaton():          #the class that hold the tables, and the list of states -> States of Node objects
-    def __init__(self,states = [],isNotDet = False,isAsync = False):
+    def __init__(self,states = [],isNotDet = False):
         self.states = states    #a list of Node object that come from the load() function
         self.combine()          #combining the transitions -> see the function to ahve more details
         self.isNotDet = isNotDet#we can check if it's deterministic while loading the automaton from the file
@@ -306,15 +305,19 @@ class Automaton():          #the class that hold the tables, and the list of sta
         return complete
 
     def combine(self):
+        #method for the automaton class used to call the combine method of the Node class
+        #for all states in the automaton
         for state in self.states:
             state.combine()
 
     def recognize(self,word,table):
-        entry = [entry for entry in table if entry.isEntry]
-        pos = entry[0]
-        for letter in word:
+        #to recognize a word, we first get the word and the table and which we will try to recognize
+        entry = [entry for entry in table if entry.isEntry] #we get the entry of the automaton
+        pos = entry[0]                                      #and we set our starting position at this entry
+        for letter in word:                                 #then we will try to go trough the automaton following the letter in the word
             found = False
-            for transition in pos.transitions:
+            for transition in pos.transitions:              #in all the transitions of the state where we currently are
+                                                            #we will try to find a a transitions corresponfing to the letter of the word
                 if transition[0] == letter:
                     found = True
                     pos = transition[1][0]
@@ -441,9 +444,11 @@ class Automaton():          #the class that hold the tables, and the list of sta
                 if state.isAsync():
                     position.append(state)
                     break
+
             if position == []:
                 states = removeUselessStates(states)
                 return states
+
             initial = position[0]
             empty = []
             while position != []:
@@ -561,13 +566,8 @@ def load(path):
         for i in final:
             states[int(i)].isOutput = True
 
-        isAsync = False
-
         for i in range(int(file.readline())):#reading directly the number of transitions, no rstrip because the conversion to int type removes it
             t = file.readline().rstrip('\n').split(':')
-            if not isAsync:
-                if t[1] == '*':
-                    isAsync = True
             states[int(t[0])].transitions.append([t[1],states[int(t[2])]])
 
-    return Automaton(states,isNotDet,isAsync)
+    return Automaton(states,isNotDet)
