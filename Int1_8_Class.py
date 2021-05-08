@@ -1,62 +1,67 @@
 import os
 
-import Int1_8_Table as Table
+import Int1_8_Table as Table        #importing the library to sidplay the transition table
 
-from copy import deepcopy
+from copy import deepcopy           #importing the deepcopy method to make duplicate of arrays
 
-class Node():
+class Node():                       #creating Class Node, which correspond to a state in the automaton
     def __init__(self, name, isEntry = False, isOutput = False):
-        self.isEntry = isEntry
+        self.isEntry = isEntry                                          #boolean to know if the state is an Entry and/or Terminal
         self.isOutput = isOutput
         self.name = name
-        self.alphabet = ["%c"%x for x in range(97,97+size_alphabet)]#creating an array containing all the letter in the alphabet of the automaton  "%c"%x is used to convert an integer (corresponding to an ASCII code here) to the corresponding character
-        self.transitions = []
+        self.alphabet = ["%c"%x for x in range(97,97+size_alphabet)]    #creating an array containing all the letter in the alphabet of the automaton  "%c"%x is used to convert an integer (corresponding to an ASCII code here) to the corresponding character
+        self.transitions = []                                           #the list that will contain the transitions of the state
 
-    def __repr__(self):#magic method in python used to represent the object in a print(object) for example or just in the conversion to str : str(object)
+    def __repr__(self):                   #magic method in python used to represent the object in a print(object) for example or just in the conversion to str : str(object)
         return "{}".format(self.name)
 
-    def display(self):
+    def display(self):                     #function used to display a State, only used for debugging
         return "label : {}\n{}Transitions : {}\n\n".format(self.name,"Initial and Final\n" if self.isEntry and self.isOutput else "Initial\n" if self.isEntry else "Final\n" if self.isOutput else "",self.transitions if len(self.transitions) > 0 else "None")
 
-    def __lt__(self, other):#rewriting the comparator methods for Nodes to be able to sort a list of Nodes, using the .sort() method
-        return self._name() < other._name()#telling it to just compare the names (in the form of a list to be able to compare fused states)
-        #doing it for all comparator < <= == >= >
-    def __le__(self,other):
+    def __lt__(self, other):                #rewriting the comparator methods for Nodes to be able to sort a list of Nodes, using the .sort() method
+        return self._name() < other._name() #telling it to just compare the names (in the form of a list to be able to compare fused states)
+                                            #doing it for all comparator < <= == >= >
+    def __le__(self,other):                 #comparator <=
         return self._name() <= other._name()
-    def __eq__(self,other):
+    def __eq__(self,other):                 #comparator ==
         return self._name() == other._name()
-    def __ge__(self,other):
+    def __ge__(self,other):                 #comparator >=
         return self._name() >= other._name()
-    def __gt__(self,other):
+    def __gt__(self,other):                 #comparator >
         return self._name() > other._name()
 
-    def _name(self):
+    def _name(self):                        #function used in the comparator, that return an array with the name decomposed
+                                            #if the name is 1.2 will return ['1','2']
         if self.name == 'P':
             return ['P']
         return [number for number in str(self).split('.')]
 
-    def __add__(self,other):#another magic method used when you write a + b here used to combine to states in the automaton
-        if self.name == '':#if the name is empty it mean that it's a placeholder, meaning that we do not have anything to combine
+    def __add__(self,other):                #another magic method used when you write a + b here used to combine to states in the automaton
+        if self.name == '':                 #if the name is empty it mean that it's a placeholder, meaning that we do not have anything to combine
             return other
         elif other.name == '':
             return self
         #getting the name of the combined state and creating the corresponding Node
-        sepS = self.name.split(".")
+        sepS = self.name.split(".")     #equivalent to the _name method
         sepO = other.name.split(".")
         sep = sepS + sepO
         name = []
+
+        #making the name composed of the two state to combine
         for t in sep:
             if t not in name:
                 name.append(t)
         name.sort()
         name = ".".join(name)
+
+        #creating the resulting Node
         result = Node(name, isOutput = True if self.isOutput or other.isOutput else False)
-        result = self._fuseTransitions(other,result)
-        result = self._fuseAsync(other,result)
+        result = self._fuseTransitions(other,result)     #fusing the normal transitions
+        result = self._fuseAsync(other,result)           #fusing the epsilon transitions
         return result
 
     def _fuseTransitions(self,other,result):
-        for letter in self.alphabet:#then fusing all the transitions by going through all the letter in the alphabet of the automaton
+        for letter in self.alphabet:#fusing all the transitions by going through all the letter in the alphabet of the automaton
             selfT = ''
             otherT = ''
             for t in self.transitions:#finding a transition corresponding to the letter in the first state
@@ -97,10 +102,10 @@ class Node():
         if selfT != '':
             if other in selfT[1]:
                 selfT[1].pop(selfT[1].index(other))
-        if otherT == '':#if we do not find one it means that there is no epsilon transition
-            if selfT != '':#mean that only selfT has a transition for that letter
+        if otherT == '':            #if we do not find one it means that there is no epsilon transition
+            if selfT != '':         #mean that only selfT has a transition for that letter
                 result.transitions.append(selfT)#thus for this letter only the first state has transition so no fusing necessary
-        elif selfT == '':#same than above but the other way around
+        elif selfT == '':           #same than above but the other way around
             if otherT != '':
                 result.transitions.append(otherT)
         elif not(otherT) == '' and not(selfT) == '':#mean that both contain a transition
@@ -111,22 +116,25 @@ class Node():
                     temp2.append(t)
             temp2.sort()#
             result.transitions.append([letter,temp2])
-
         return result
 
-    def combine(self):
+    def combine(self):      #combining transitions after laoding the automaton from a file
+                            #because they can be in the form [['a',[0]],['a',[1]]] -> [['a',[0,1]]]
+                            #to have only one object in the list corresponding to a letter in the alphabet
         new = []
         for letter in self.alphabet:
-            temp = [t[1] for t in self.transitions if t[0]==letter]
-            if len(temp)>0:
-                temp.sort()
+            #list comprehension, you can check the int1-8-Example.py file to see how they work
+            temp = [t[1] for t in self.transitions if t[0]==letter] #getting all the transitions ['letter',[X]] from the list
+            if len(temp)>0:         #if there is at least one we combine them
+                temp.sort()         #first we sort them to avoid having [1,0]
                 newT = [temp]
                 newT.insert(0,letter)
                 new.append(newT)
+
         #doing the same than above but for epsilon transitions represented by a *
+        #because the * is not in the alphabet
         temp = [t[1] for t in self.transitions if t[0]=='*']
         if len(temp)>0:
-            temp.sort()
             temp.sort()
             newT = [temp]
             newT.insert(0,'*')
@@ -134,45 +142,67 @@ class Node():
         self.transitions = new
 
     def isAsync(self):
+        #to know if the automaton is async we just need to find one epsilon transitions
         for transition in self.transitions:
+            #we got through all the transitions until we find one epsilon
             if transition[0] == '*':
                 return True
+        #if we haven't found any we return False
         return False
 
+
     def getEpsilon(self):
+        #function to get the list of epsilon transitions
         for transition in self.transitions:
             if transition[0] == '*':
+                #since the transitions have been combined (see combine() function) we have only one that contain all
                 return transition[1]
+
+        #if we haven't found any we return an empty list
         return []
 
-class Automaton():
+class Automaton():          #the class that hold the tables, and the list of states -> States of Node objects
     def __init__(self,states = [],isNotDet = False,isAsync = False):
-        self.states = states
-        self.combine()
-        self.isNotDet = isNotDet
-        self.alphabet = ["%c"%x for x in range(97,97+size_alphabet)]
+        self.states = states    #a list of Node object that come from the load() function
+        self.combine()          #combining the transitions -> see the function to ahve more details
+        self.isNotDet = isNotDet#we can check if it's deterministic while loading the automaton from the file
+        self.alphabet = ["%c"%x for x in range(97,97+size_alphabet)] #see the Node class definition to see how it work
 
-    def __repr__(self):
+    def __repr__(self):     #magic method used to display all the states of the automaton (for debug purposes)
         output = "Alphabet : {}\n\n".format(self.alphabet)
-        output2 = "".join(state.display() for state in self.states)
+        output2 = "".join(state.display() for state in self.states) #will call the display() function for all states in the automaton
         return output + output2
 
     def table(self,input = []):
-        if input == []:#mean that it's not for the deterministic or complete automaton
+        #function that uses the Table from Int1_8_Table, which Elvin has rewrote from the PTable python library
+        #this library is also used by the group Int2-6 hence their function being similar, because it implements the same function
+        #the code in the Table file is not commented because it's not part of the project, it's to be considered as a normal library
+        #I (Elvin) rewrote it just for it to be easier for you to run it, avoiding the need to install the original library
+
+        if input == []:#a default parameter meaning that we display the base automaton table
             input = self.states
-        table = Table.Table()
-        #table = PrettyTable()
-        fields = [letter for letter in self.alphabet]
+
+        table = Table.Table() #initializing the Table object
+
+        fields = [letter for letter in self.alphabet] #the fields are the names of the columns, it's composed of all the letters+ the * for epsilon transition if they exist
         asynchronous = False
         if isAsync(input):
             asynchronous = True
         if asynchronous:
+            #if the table is asynchronous we add the field *
             fields.append('*')
         fields.insert(0,"States")
         table.field_names = fields
+
         for state in input:
+            #each state will correspond to a row in the resulting table
+
+            #we initialyse the row with empty characters, to have a placeholder for a non complete Automaton
+            #for which there might be some non-existing transitions
             row = [' ' for i in range(len(self.alphabet) + 1*asynchronous)]
             state.transitions.sort()
+
+            #a long ternary operator to determine if the state is an Entry, a Terminal state or both or nothing
             row.insert(0,"{}{}".format("<->" if state.isOutput and state.isEntry else " <-" if state.isOutput else " ->" if state.isEntry else "   ",state.name))
             for x in state.transitions:
                 text = [str(t) for t in x[1]]
@@ -182,10 +212,14 @@ class Automaton():
         return table
 
     def isDeterministic(self,table = ''):
+        #to know if an automaton is deterministic we just have to check if a transition has multiple destinations
+        #Example : [['a',[1,2]]] -> for the letter a there is multiple choice the state 1 or 2 -> the state is nonDeterministic
         if table == '':
             table = self.states
         for state in table:
             for transition in state.transitions:
+                #in [['a',[1,2]]] correspong to this part
+                #           ^
                 if len(transition[1]) > 1:
                     return False
         return True

@@ -1,4 +1,9 @@
 
+#This code is not to be considered as part of the project
+#it's the rewriting of some functions of the PTable library that I used to display the transition table
+#as it's said in the Class.py file, the groupe Int2-6 also use it
+
+
 class Table():
     def __init__(self):
         self.field_names = []
