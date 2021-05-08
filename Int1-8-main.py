@@ -37,6 +37,7 @@ while leaving == 0 :
         print(auto.table())
 
         ope = 0
+        previous = ''
         while (ope != 8):
             ope = int(input("Which operation do you want to do? Type :\n 1 to determinize,\n 2 to complete,\n 3 to minimize,\n 4 to standardize,\n 5 to check if a given word is recognized,\n 6 to make the automaton synchronous,\n 7 to complementarize it,\n 8 to change automaton,\n 9 to leave the program. "))
             while not 0 < ope < 10:
@@ -46,40 +47,60 @@ while leaving == 0 :
             print("\n")
 
             if (ope == 1):   #determinize
-                if(not auto.isDeterministic()):
-                    auto.det_table = auto.determinize()
+                if isAsync(auto.states):
+                    table = auto.synchronize()
+                else:
+                    table = auto.states
+                if(not auto.isDeterministic(table)):
+                    auto.det_table = auto.determinize(table)
                     print("Deterministic Finite Automaton table :")
                     print(auto.table(auto.det_table))
+                    previous = auto.det_table
                 else:
                     print("Automaton already deterministic. ")
 
 
             elif(ope == 2): #complete
-                if(not auto.isDeterministic()): #cant complete a non deterministic FA
-                    auto.det_table = auto.determinize()
-                if(auto.isDeterministic() and auto.isComplete()): #need both cause a non deterministic FA could have the properties of a complete FA
+                if isAsync(auto.states):
+                    table = auto.synchronize()
+                else:
+                    table = auto.states
+                if(not auto.isDeterministic(table)): #cant complete a non deterministic FA
+                    auto.det_table = auto.determinize(table)
+                if(auto.isDeterministic(table) and auto.isComplete(table)): #need both cause a non deterministic FA could have the properties of a complete FA
                     print("Automaton already complete.\n")
 
                 else:
-                    auto.complete()
+                    complete = auto.complete(table)
                     print("Complete Deterministic Finite Automaton table :")
-                    print(auto.table(auto.complete))
-
+                    print(auto.table(complete))
+                    previous = complete
 
             elif(ope == 3): #minimize
-                if(not auto.isDeterministic()): #FA needs to be complete and therefore deterministic to minimize it
-                    auto.det_table = auto.determinize()
+                if isAsync(auto.states):
+                    table = auto.synchronize()
+                else:
+                    table = auto.states
+                if(not auto.isDeterministic(table)): #FA needs to be complete and therefore deterministic to minimize it
+                    auto.det_table = auto.determinize(table)
                     table = auto.complete()
-                elif(not auto.isComplete()):
-                    table = auto.complete()
+                elif(not auto.isComplete(table)):
+                    table = auto.complete(table)
 
                 minimized = auto.minimize(table)
                 print("Minimized Finite Automaton table :")
                 print(auto.table(minimized))
+                previous = minimized
 
 
             elif (ope == 4): #standardize
-                if(auto.isStandard()):
+                if previous == '':
+                    table = auto.states
+                else:
+                    table = previous
+                if isAsync(table):
+                    table = auto.synchronize()
+                if(auto.isStandard(table)):
                     print("Automaton already standard.")
                 else:
                     standardized = auto.standardize()
@@ -110,17 +131,22 @@ while leaving == 0 :
                     print("Automaton already synchronous")
 
             elif(ope == 7): #complementarize
-                if(not auto.isDeterministic()): #cant get complementary if not complete and deterministic
-                    auto.det_table = auto.determinize()
+                if isAsync(auto.states):
+                    table = auto.synchronize()
+                else:
+                    table = auto.states
+                if(not auto.isDeterministic(table)): #cant get complementary if not complete and deterministic
+                    auto.det_table = auto.determinize(table)
                     table = auto.complete()
-                elif(not auto.isComplete()):
-                    table = auto.complete()
+                elif(not auto.isComplete(table)):
+                    table = auto.complete(table)
                 else:
                     table = auto.states
 
                 print("Complement of Complete Deterministic Finite Automaton table :")
                 complement = auto.complementary(table)
                 print(auto.table(complement))
+                previous = complement
 
 
             elif(ope == 9): #leave program

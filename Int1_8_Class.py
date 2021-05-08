@@ -223,19 +223,20 @@ class Automaton():          #the class that hold the tables, and the list of sta
                     return False
         return True
 
-    def determinize(self,det_table = 'None'):
-        if det_table == 'None':#first part of the algorithm
-            if self.isNotDet:#mean that there is multiple entries
-                init_entries = [entry for entry in self.states if entry.isEntry]#getting the list of states being entries in the automaton
-                entries = deepcopy(init_entries)
-                new_state = Node('')
-                for i in range(0,len(entries)):
-                    new_state = new_state + entries[i]
-                new_state.isEntry = True
-                det_table = [new_state]
-            else:
-                entry = [entry for entry in self.states if entry.isEntry]#here we have only one entry but get it in the form of a list because the way of searching is more efficient
-                det_table = deepcopy(entry)
+    def determinize(self,table = None):
+        if table is None:
+            table = self.states
+        if self.isNotDet:#mean that there is multiple entries
+            init_entries = [entry for entry in table.states if entry.isEntry]#getting the list of states being entries in the automaton
+            entries = deepcopy(init_entries)
+            new_state = Node('')
+            for i in range(0,len(entries)):
+                new_state = new_state + entries[i]
+            new_state.isEntry = True
+            det_table = [new_state]
+        else:
+            entry = [entry for entry in table.states if entry.isEntry]#here we have only one entry but get it in the form of a list because the way of searching is more efficient
+            det_table = deepcopy(entry)
         #if we got here it means that either the det_table was empty and we filled it or it was already created
         added = True
         while added:
@@ -336,18 +337,22 @@ class Automaton():          #the class that hold the tables, and the list of sta
                 state.isOutput = True
         return complement
 
-    def isStandard(self):
-        entries = [entry for entry in self.states if entry.isEntry]
+    def isStandard(self,table = ''):
+        if table == '':
+            table = self.states
+        entries = [entry for entry in table if entry.isEntry]
         if len(entries) > 1:
             return 0
-        for state in self.states:
+        for state in table:
             for transition in state.transitions:
                 if entries[0] in transition[1]:
                     return 0
         return 1
 
-    def standardize(self):
-        states = deepcopy(self.states)
+    def standardize(self, table = ''):
+        if table == '':
+            table = self.states
+        states = deepcopy(table)
         new_state = Node('i')
         transitions = [state.transitions for state in states if state.isEntry]
         for state in states:
@@ -372,7 +377,6 @@ class Automaton():          #the class that hold the tables, and the list of sta
                     combine.append(t[0])
             transition[1] = combine
         states.append(new_state)
-        self.standard = states
         return states
 
     def minimize(self,data):
