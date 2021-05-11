@@ -1,0 +1,108 @@
++--------+---+
+| States | a |
++--------+---+
+|   <-0  | 0 |
+|   ->1  | 2 |
+|     2  | 0 |
++--------+---+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+1
+Automaton already deterministic. 
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+2
+Automaton already complete.
+
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+3
+Minimized Finite Automaton table :
++--------+-----+
+| States |  a  |
++--------+-----+
+|  <-0.2 | 0.2 |
+|   ->1  | 0.2 |
++--------+-----+
+
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+4
+Automaton already standard.
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+6
+Automaton already synchronous
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+7
+Complement of Complete Deterministic Finite Automaton table :
++--------+---+
+| States | a |
++--------+---+
+|     0  | 0 |
+|  <->1  | 2 |
+|   <-2  | 0 |
++--------+---+
+
+
+

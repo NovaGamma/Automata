@@ -213,6 +213,8 @@ class Automaton():          #the class that hold the tables, and the list of sta
     def isDeterministic(self,table = ''):
         #to know if an automaton is deterministic we just have to check if a transition has multiple destinations
         #Example : [['a',[1,2]]] -> for the letter a there is multiple choice the state 1 or 2 -> the state is nonDeterministic
+        if self.isNotDet:
+            return False
         if table == '':
             table = self.states
         for state in table:
@@ -227,25 +229,31 @@ class Automaton():          #the class that hold the tables, and the list of sta
         if table is None:
             table = self.states
         if self.isNotDet:#mean that there is multiple entries
-            init_entries = [entry for entry in table.states if entry.isEntry]#getting the list of states being entries in the automaton
+            init_entries = [entry for entry in table if entry.isEntry]#getting the list of states being entries in the automaton
             entries = deepcopy(init_entries)
+
+            #fusing the entries to obtain the entry state for the determinisic table
             new_state = Node('')
             for i in range(0,len(entries)):
                 new_state = new_state + entries[i]
             new_state.isEntry = True
             det_table = [new_state]
         else:
-            entry = [entry for entry in table.states if entry.isEntry]#here we have only one entry but get it in the form of a list because the way of searching is more efficient
+            entry = [entry for entry in table if entry.isEntry]#here we have only one entry but get it in the form of a list because the way of searching is more efficient
             det_table = deepcopy(entry)
-        #if we got here it means that either the det_table was empty and we filled it or it was already created
+
+        #here we will add all the fused states that need to be created, or the primordial one to be added
         added = True
         while added:
             added = False
+            #we will check for each state in the det_table
             for state in det_table:
                 for transition in state.transitions:
                     if len(transition[1]) > 1:#mean that we have a composite state to create
                         temp = [str(t) for t in transition[1]]
                         #removing duplicates in temp to have a clean name
+
+                        #creating the name of the resulting state
                         temp2 = []
                         for t in temp:
                             temp3 = t.split(".")
@@ -253,46 +261,61 @@ class Automaton():          #the class that hold the tables, and the list of sta
                                 if i not in temp2:
                                     temp2.append(i)
                         name = ".".join(temp2)
+
+                        #then we check if this state already exists in the det_table
                         found = False
                         for s in det_table:
                             if str(s.name) == name:
                                 transition[1] = [s]
                                 found = True
-                        if not(found):
+                        #if we did not find it we will create it and add it to the table
+                        if not found:
                             added = True
                             new_state = Node('')
+                            #fusing all the states that composed the combined state
                             for i in range(0,len(transition[1])):
                                 new_state = new_state + transition[1][i]
                             transition[1] = [new_state]
+                            #adding it to the table
                             det_table.append(new_state)
                     else:#looking for primordial states that were not added to the det_table
                         for s in self.states:
+                            #we check for each existing primordial state
                             if str(s.name) == transition[1][0].name:
                                 if s not in det_table:
+                                    #if it's not in the det_table we add it, but remove the isEntry to avoir having two entries in a determniistic automaton
                                     s.isEntry = False
                                     det_table.append(deepcopy(s))
                                     added = True
         return det_table
 
     def isComplete(self,table = ''):
+        #to check if the table is complete we just have to check if there exists a transitions for each letter in the alphabet
         if table == '':
             table = self.states
         for state in table:
             for letter in self.alphabet:
                 found = False
+                #we check if there exist one transitions corresponding to the letter
                 for transition in state.transitions:
                     if letter == transition[0]:
                         found = True
                 if not found:
+                    #if we did not found it it means that the automaton isn't complete
                     return False
         return True
 
     def complete(self,table = ''):
+        #to complete the automaton we just need to set the missing transitions to a sink state P
         if table == '':
             table = self.det_table
         complete = deepcopy(table)
+        #creating the sink state P
         sink = Node('P')
+        #setting it's transitions to itself for each letter in the alphabet
         sink.transitions = [[letter,[sink]] for letter in self.alphabet]
+
+        #then we go trough each state to find the missing transitions
         for state in complete:
             for letter in self.alphabet:
                 found = False
@@ -300,6 +323,7 @@ class Automaton():          #the class that hold the tables, and the list of sta
                     if letter == transition[0]:
                         found = True
                 if not found:
+                    #if we didn't found the transition corresponding to the letter we add one to P
                     state.transitions.append([letter,[sink]])
             state.transitions.sort()
         complete.append(sink)
@@ -329,6 +353,7 @@ class Automaton():          #the class that hold the tables, and the list of sta
         return False
 
     def complementary(self,table):
+        #to do the complementary we just flip the value of isOutput for each state in the automaton
         complement = deepcopy(table)
         for state in complement:
             if state.isOutput:
@@ -338,31 +363,41 @@ class Automaton():          #the class that hold the tables, and the list of sta
         return complement
 
     def isStandard(self,table = ''):
+        #there is two ways for an automaton to not be standard
         if table == '':
             table = self.states
         entries = [entry for entry in table if entry.isEntry]
+        #the first one is having multiple entries so we get the list of entries and check it's length
+        #if it's greater than 1 it mean that the automaton is not standard
         if len(entries) > 1:
-            return 0
+            return False
+        #the other way is for the automaton to have transitions that goes back to the netry state
+        #so we check for each transitions in each state if there is a transition that goes back to the entry
         for state in table:
             for transition in state.transitions:
                 if entries[0] in transition[1]:
-                    return 0
-        return 1
+                    return False
+        return True
 
     def standardize(self, table = ''):
         if table == '':
             table = self.states
         states = deepcopy(table)
+        #to standardize we will create a new state that will be the fusion of all the entry states
         new_state = Node('i')
+        #we get the transitions of all the entry states
         transitions = [state.transitions for state in states if state.isEntry]
+        #we set all to entry states to not be entries anymore
         for state in states:
             if state.isEntry:
                 state.isEntry = False
+        #then we combine the transitions for i, and we remove the duplicate transtitions
         t_comb = []
         for t in transitions:
             for t2 in t:
                 t_comb.append(t2)
         transitions = t_comb
+        #we set the i state to be an entry and it's transitions to be the list of the transitions of the previous entries
         new_state.isEntry = True
         new_state.transitions = transitions
         new_state.combine()
@@ -382,27 +417,39 @@ class Automaton():          #the class that hold the tables, and the list of sta
     def minimize(self,data):
         states = deepcopy(data)
         #first part it to get the sub groups using the Terminal states
+
+        #we get the list of terminal states
         T = [state for state in states if state.isOutput]
         groups = {}
+        #we check for each state if it point toward a terminal state or not
+        #we build a type using this
         for state in states:
             type = ''
             for transition in state.transitions:
                 if transition[1][0] in T:
+                    #mean that it's a terminal state so we add T to the type
                     type += 'T'
                 else:
+                    #else NT
                     type += 'NT'
+            #we check if there already exists states which posess this type else we create it
             if not type in groups.keys():
                 groups[type] = [state]
             else:
                 groups[type].append(state)
 
+        #we rename the subgroups
+        #see the method for more info
         groups = dict_names(groups)
 
         #Now we will iterate the function until we have the same set at the beginning and at the end
         previous = {}
-        while previous != groups:
+        iter = 0
+        #setting an iter to avoid looping problems
+        while not previous == groups and iter < 100:
             previous = groups
             groups = {}
+            #we check for each state of each subgoup to which subgroup it's transitions point to
             for key,group in previous.items():
                 if len(group) > 1:
                     for state in group:
@@ -418,6 +465,7 @@ class Automaton():          #the class that hold the tables, and the list of sta
                 else:
                     groups[key] = group
             groups = dict_names(groups)
+            iter += 1
 
         #now we will rebuild the table based on the obtained dictionnary
         minimized = []
@@ -435,6 +483,22 @@ class Automaton():          #the class that hold the tables, and the list of sta
                 minimized.append(new_state)
             else:
                 minimized.append(group[0])
+
+        for state in minimized:
+            for transition in state.transitions:
+                for i,destination in enumerate(transition[1]):
+                    #if the destination isn't already a fused state
+                    if not destination in minimized:
+                        name = str(destination)
+                        for state_name in minimized:
+                            names = str(state_name).split('.')
+                            if name in names:
+                                transition[1][i] = state_name
+                temp2 = []
+                for temp in transition[1]:
+                    if not temp in temp2:
+                        temp2.append(temp)
+                transition[1] = temp2
         return minimized
 
     def synchronize(self):
@@ -444,49 +508,68 @@ class Automaton():          #the class that hold the tables, and the list of sta
             position = []
             path = []
 
+            #we get the first state that has epsilon transitions in the list of states
             for state in states:
                 if state.isAsync():
                     position.append(state)
                     break
 
+            #if we didn't found any state with epsilon transitions it mean that the automaton is synchronous
             if position == []:
+                #we remove the useless states -> those that will never be accessed
                 states = removeUselessStates(states)
+                #and we return the automaton
                 return states
 
+            #we start from the state having epsilon transitions
             initial = position[0]
             empty = []
+            #we will traverse the automaton trough the epsilon transitions
             while position != []:
                 pos = position[0]
                 epsilon = pos.getEpsilon()
                 for direction in epsilon:
                     if not direction in path:
+                        #if check if the state were it's pointing is async and has transition and is not the terminal state
                         if direction.isAsync() and len(direction.transitions) == 1 and not direction.isOutput:
+                            #if yes it mean that we can continue in this direction
                             position.append(direction)
                             empty.append(direction)
                         else:
+                            #otherwise we stop here and now that the initial state will point directly toward this one
                             path.append(direction)
                 position.remove(pos)
 
+            #then after finding each non async state where the initial can point toward
+            #we create the new transitions for the initial state
             new_transition = []
             for state in path:
                 if not state.transitions == []:
+                    #we add in a list all the transitions of those states
                     for transition in state.transitions:
                         new_transition.append(transition)
+                #and if it point toward the terminal state, it mean that it will be terminal aswell
                 elif state.isOutput:
                     initial.isOutput = True
 
             letters = deepcopy(self.alphabet)
             letters.append('*')
 
-            if initial.isAsync and len(initial.transitions) > 1:
-                initial.transitions.remove(initial.getEpsilon())
+            #getting the transitions of the initial state if the state is async and there non epsilon transitions
+            if initial.isAsync() and len(initial.transitions) > 1:
+                #we get and remove the epsilon transitions and then add the remaining transitions to the list
+                for transition in initial.transitions:
+                    if transition[0] == '*':
+                        to_remove = transition
+                initial.transitions.remove(to_remove)
                 new_transition.append(initial.transitions)
+            #we fuse all the epsilon transitions into one
             initial.transitions = async_combine(new_transition,letters)
 
-
+            #equivalent to the removeUselessStates method but just for the empty list
             to_remove = []
             for state in empty:
-                #we are going to find the states that point toward those to see if it has only one access
+                #we check for each state to see if one has a transition going to the state to remove
                 found = 0
                 for s in states:
                     if not s in empty:
@@ -494,27 +577,37 @@ class Automaton():          #the class that hold the tables, and the list of sta
                             if state in transition[1]:
                                 found += 1
                 if found == 0:
+                    #if it doesn't have one we add it to the list
                     to_remove.append(state)
 
+            #and then we remove it from the list of states
             for state in to_remove:
                 states.remove(state)
 
 def dict_names(groups):
+    #this function is used to change the name of the groups in the minimization
+    #we set the names to be composed of the names of the states that are in the group
     new = {}
-    for _,group in groups.items():
+    for _,group in groups.items():#see the Example file to have example of the .items() method
+        #we go trough the entire group which is a dictionnary that contain the other subgroups
+        #and for each subgroup we get the name of each state and then create a string from it
         temp = [str(state) for state in group]
         new_name = '|'.join(temp)
+        #and we set it as the new name of the subgroup
         new[new_name] = group
     return new
 
 def isAsync(states):
+    #a second method used to know if the automaton is async
+    #it's juste calling the isAsync method of each state
     for state in states:
-        for transition in state.transitions:
-            if transition[0] == '*':
-                return True
+        if state.isAsync():
+            return True
     return False
 
 def async_combine(transitions,letters):
+    #here we combine the epsilon transitions as we would to in the combine method
+    #it works the same way so check the comments in this method
     new = []
     for letter in letters:
         temp = []

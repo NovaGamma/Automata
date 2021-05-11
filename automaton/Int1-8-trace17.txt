@@ -1,0 +1,155 @@
++--------+-------+-------+-------+-------+
+| States |   a   |   b   |   c   |   d   |
++--------+-------+-------+-------+-------+
+|     0  |       |       |       |       |
+|   ->1  | 1 , 2 |       |       |       |
+|   ->2  |       | 2 , 3 |       |       |
+|   ->3  |       |       | 3 , 4 |       |
+|   ->4  |       |       |       | 4 , 5 |
+|   <-5  |   0   |   0   |   0   |   0   |
++--------+-------+-------+-------+-------+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+1
+Deterministic Finite Automaton table :
++------------+-----+-----+-----+-------+
+|   States   |  a  |  b  |  c  |   d   |
++------------+-----+-----+-----+-------+
+|  ->1.2.3.4 | 1.2 | 2.3 | 3.4 |  4.5  |
+|      1.2   | 1.2 | 2.3 |     |       |
+|      2.3   |     | 2.3 | 3.4 |       |
+|      3.4   |     |     | 3.4 |  4.5  |
+|    <-4.5   |  0  |  0  |  0  | 0.4.5 |
+|       0    |     |     |     |       |
+|   <-0.4.5  |  0  |  0  |  0  | 0.4.5 |
++------------+-----+-----+-----+-------+
+
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+2
+Complete Deterministic Finite Automaton table :
++--------+-------+-------+-------+-------+
+| States |   a   |   b   |   c   |   d   |
++--------+-------+-------+-------+-------+
+|     0  |   P   |   P   |   P   |   P   |
+|   ->1  | 1 , 2 |   P   |   P   |   P   |
+|   ->2  |   P   | 2 , 3 |   P   |   P   |
+|   ->3  |   P   |   P   | 3 , 4 |   P   |
+|   ->4  |   P   |   P   |   P   | 4 , 5 |
+|   <-5  |   0   |   0   |   0   |   0   |
+|     P  |   P   |   P   |   P   |   P   |
++--------+-------+-------+-------+-------+
+
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+3
+Minimized Finite Automaton table :
++------------+-----+-----+-----+-------+
+|   States   |  a  |  b  |  c  |   d   |
++------------+-----+-----+-----+-------+
+|  ->1.2.3.4 | 1.2 | 2.3 | 3.4 |  4.5  |
+|      3.4   | 0.P | 0.P | 3.4 |  4.5  |
+|   <-0.4.5  | 0.P | 0.P | 0.P | 0.4.5 |
+|      1.2   | 1.2 | 2.3 | 0.P |  0.P  |
+|      0.P   | 0.P | 0.P | 0.P |  0.P  |
+|      2.3   | 0.P | 2.3 | 3.4 |  0.P  |
++------------+-----+-----+-----+-------+
+
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+4
+Standard Finite Automaton table :
++--------+-------+-------+-------+-------+
+| States |   a   |   b   |   c   |   d   |
++--------+-------+-------+-------+-------+
+|     0  |       |       |       |       |
+|     1  | 1 , 2 |       |       |       |
+|     2  |       | 2 , 3 |       |       |
+|     3  |       |       | 3 , 4 |       |
+|     4  |       |       |       | 4 , 5 |
+|   <-5  |   0   |   0   |   0   |   0   |
+|   ->i  | 1 , 2 | 2 , 3 | 3 , 4 | 4 , 5 |
++--------+-------+-------+-------+-------+
+
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+6
+Automaton already synchronous
+
+
+Which operation do you want to do? Type :
+ 1 to determinize,
+ 2 to complete,
+ 3 to minimize,
+ 4 to standardize,
+ 5 to check if a given word is recognized,
+ 6 to make the automaton synchronous,
+ 7 to complementarize it,
+ 8 to change automaton,
+ 9 to leave the program. 
+7
+Complement of Complete Deterministic Finite Automaton table :
++------------+-----+-----+-----+-------+
+|   States   |  a  |  b  |  c  |   d   |
++------------+-----+-----+-----+-------+
+| <->1.2.3.4 | 1.2 | 2.3 | 3.4 |  4.5  |
+|    <-1.2   | 1.2 | 2.3 |  P  |   P   |
+|    <-2.3   |  P  | 2.3 | 3.4 |   P   |
+|    <-3.4   |  P  |  P  | 3.4 |  4.5  |
+|      4.5   |  0  |  0  |  0  | 0.4.5 |
+|     <-0    |  P  |  P  |  P  |   P   |
+|     0.4.5  |  0  |  0  |  0  | 0.4.5 |
+|     <-P    |  P  |  P  |  P  |   P   |
++------------+-----+-----+-----+-------+
+
+
+

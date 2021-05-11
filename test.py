@@ -1,7 +1,6 @@
+array = [i for i in range(20)]
 
-a = True
-while a:
-    t = input()
-    print(t)
-    if t == 'AH':
-        quit()
+for i,v in enumerate(array):
+    if v == 2:
+        array[i] = 'test'
+print(array)

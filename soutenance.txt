@@ -1,0 +1,57 @@
+Classes / data struct
+
+Two classes -> 2 types of objects:
+	the Automaton -> only one instance
+	the Nodes == States
+
+Automaton possess some initial attributes :
+	states -> array of Nodes
+	alphabet -> array containing all the letters 
+	isNotDet -> a check while loading it to know if there is multiple entries
+
+Node :
+	transitions -> the array containing all the transitions of the states on which we will focus later
+	alphabet -> same array containnig all the letters as Automaton
+	isEntry -> boolean to know if it's an initial state
+	isOutput -> boolean to know if it's a terminal state
+
+
+states -> just an array of Nodes
+
+transitions -> array of transitions where at first we have the transitions registered as 
+
+['a',[1]] -> with one being a reference to the Node object of label 1
+we obtain an array like this [ ['a',[1,2]] , ['b',[0]] ]
+
+
+
+magic method
+
+magic methods are special class methods in python used internaly to do some operation with built-in functions
+
+we used those to be able to compare two Node object to be able to sort an array of Node
+and another one to be able to add two Node by just doing 1 + 2 -> 1 and 2 being here reference to the objects
+
+the most interesting in our code is the __add__ method which we used to fused two state 
+first we get the combine name of the resulting state which is just a concatenation of the name of the two states
+
+then we will fuse the transitions for each letter
+and in the case one transitions in refering to the state we are creating we do not set a reference, we just set the name is a certain way to latter be able to see that it has to be created or linked to an existing state -> as done in the determinization
+
+
+synchonize
+
+to synchronize is to remove the epsilon transitions of an automaton
+This is maybe the most abstract functionnality of our code
+
+
+to do it we first get a state which has epsilon transtitions,
+then we follow the epsilon transitions while storing the path in a list
+when we arrive to a state that does not contain an epsilon transition we stop the branch of the path and store this state
+because we will directly link the transitions of all end of branch state transitions to the initial state
+
+by doing this we remove the epsilon transitions, we also need to remove the old state that do not have transitions to them anymore
+
+after this we choose another state having epsilon transitions and we repeat the process until there is no more having epsilon transitions
+
+then we know we are finished
